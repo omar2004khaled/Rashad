@@ -1,0 +1,13 @@
+{
+  "target_sample_rate": 16000,
+  "convert_to_mono": false,
+  "convert_to_float32": true,
+  "normalize": false,
+  "normalize_target_dbfs": -1.0,
+  "normalize_max_gain_db": 6.0,
+  "normalize_minimum_peak_dbfs": -50.0,
+  "noise_reduction": false,
+  "noise_reduction_strength": 0.35,
+  "silence_threshold_dbfs": -60.0,
+  "clipping_threshold": 0.99999
+}
