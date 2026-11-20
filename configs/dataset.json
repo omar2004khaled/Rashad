@@ -1,0 +1,37 @@
+{
+  "dataset_id": "obadx/muaalem-annotated-v3",
+  "available_configurations": [
+    "moshaf_0.0", "moshaf_0.1", "moshaf_0.2", "moshaf_0.3",
+    "moshaf_1.0", "moshaf_11.0", "moshaf_12.0", "moshaf_13.0",
+    "moshaf_19.0", "moshaf_2.0", "moshaf_2.1", "moshaf_22.0",
+    "moshaf_24.0", "moshaf_25.0", "moshaf_26.0", "moshaf_26.1",
+    "moshaf_27.0", "moshaf_28.0", "moshaf_29.0", "moshaf_3.0",
+    "moshaf_30.0", "moshaf_4.0", "moshaf_5.0", "moshaf_6.0",
+    "moshaf_7.0", "moshaf_8.0", "moshaf_9.0",
+    "moshaf_metadata", "reciters_metadata"
+  ],
+  "recitation_configurations": [
+    "moshaf_0.0", "moshaf_0.1", "moshaf_0.2", "moshaf_0.3",
+    "moshaf_1.0", "moshaf_11.0", "moshaf_12.0", "moshaf_13.0",
+    "moshaf_19.0", "moshaf_2.0", "moshaf_2.1", "moshaf_22.0",
+    "moshaf_24.0", "moshaf_25.0", "moshaf_26.0", "moshaf_26.1",
+    "moshaf_27.0", "moshaf_28.0", "moshaf_29.0", "moshaf_3.0",
+    "moshaf_30.0", "moshaf_4.0", "moshaf_5.0", "moshaf_6.0",
+    "moshaf_7.0", "moshaf_8.0", "moshaf_9.0"
+  ],
+  "metadata_configurations": {
+    "moshaf": "moshaf_metadata",
+    "reciters": "reciters_metadata"
+  },
+  "default_split": "train",
+  "selected_configurations": ["moshaf_0.1"],
+  "sample_limit": 3,
+  "streaming": true,
+  "decode_audio": false,
+  "shuffle_seed": 42,
+  "shuffle_buffer_size": 1000,
+  "schema_unavailable_via_stage1_first_rows": [
+    "moshaf_0.0", "moshaf_5.0", "moshaf_11.0",
+    "moshaf_19.0", "moshaf_26.0", "moshaf_30.0"
+  ]
+}

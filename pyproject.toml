@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quran-dataset-loader"
+version = "0.1.0"
+description = "Streaming access tools for the Quran Muaalem annotated dataset"
+requires-python = ">=3.10"
+dependencies = [
+  "datasets>=4.0,<5",
+  "huggingface_hub>=1.0,<2",
+  "numpy>=1.26,<3",
+  "pandas>=2.0,<4",
+  "soundfile>=0.12,<1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "nbclient>=0.10", "nbformat>=5.9"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
