@@ -1,8 +1,11 @@
 import torch
 import pytest
+import json
+from safetensors.torch import save_file
 from transformers import Wav2Vec2BertConfig
 
 from quran_model import QuranMultiLevelCTC, QuranMultiLevelCTCConfig
+from quran_model.modeling import CheckpointCompatibilityError
 from quran_model.configuration import REFERENCE_LEVEL_TO_VOCAB_SIZE
 from quran_training_data.encoding import LabelCodec
 
@@ -130,6 +133,12 @@ def test_rejects_blank_as_target_and_wrong_feature_dimension():
         model(torch.randn(1, 12, 80))
 
 
+def test_gradient_checkpointing_can_be_enabled():
+    model = QuranMultiLevelCTC(tiny_config())
+    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    assert model.encoder.encoder.gradient_checkpointing is True
+
+
 def test_config_serialization_round_trip(tmp_path):
     config = tiny_config()
     model = QuranMultiLevelCTC(config)
@@ -140,6 +149,59 @@ def test_config_serialization_round_trip(tmp_path):
     assert restored.config.pad_token_id == 0
     assert restored.config.ctc_loss_reduction == "mean"
     assert restored(torch.randn(1, 9, 160)).logits["ghonna"].shape == (1, 9, 3)
+
+
+def _write_synthetic_original_checkpoint(path, *, omit_key=None, mismatch_key=None, add_unexpected=False):
+    source_model = QuranMultiLevelCTC(tiny_config()).eval()
+    source = {}
+    for key, tensor in source_model.state_dict().items():
+        if key == omit_key:
+            continue
+        source_key = "wav2vec2_bert." + key.removeprefix("encoder.") if key.startswith("encoder.") else key
+        value = tensor.detach().cpu().contiguous()
+        if key == mismatch_key:
+            value = value.flatten()[:1].clone()
+        source[source_key] = value
+    if add_unexpected:
+        source["unexpected.weight"] = torch.zeros(1)
+    save_file(source, str(path / "model.safetensors"))
+    raw = dict(source_model.encoder.config.to_dict())
+    raw.update({
+        "level_to_vocab_size": source_model.config.level_to_vocab_size,
+        "level_to_loss_weight": source_model.config.level_to_loss_weight,
+        "final_dropout": source_model.config.final_dropout,
+        "pad_token_id": 0,
+        "ctc_loss_reduction": source_model.config.ctc_loss_reduction,
+        "ctc_zero_infinity": False,
+    })
+    (path / "config.json").write_text(json.dumps(raw), encoding="utf-8")
+    return source_model
+
+
+def test_original_checkpoint_parameter_mapping_loads_encoder_and_heads(tmp_path):
+    source_model = _write_synthetic_original_checkpoint(tmp_path)
+    loaded, report = QuranMultiLevelCTC.from_pretrained_checkpoint(tmp_path)
+    assert report.is_complete
+    assert not report.missing and not report.unexpected and not report.shape_mismatches
+    assert report.loaded_parameter_count == sum(x.numel() for x in source_model.state_dict().values())
+    matched = dict(report.matched)
+    assert matched["wav2vec2_bert.feature_projection.projection.weight"] == "encoder.feature_projection.projection.weight"
+    assert ("level_to_lm_head.phonemes.weight", "level_to_lm_head.phonemes.weight") in report.matched
+    for key, value in source_model.state_dict().items():
+        assert torch.equal(value, loaded.state_dict()[key])
+
+
+@pytest.mark.parametrize("kwargs, report_field", [
+    ({"omit_key": "encoder.feature_projection.projection.weight"}, "missing"),
+    ({"mismatch_key": "encoder.feature_projection.projection.weight"}, "shape_mismatches"),
+    ({"mismatch_key": "level_to_lm_head.phonemes.weight"}, "shape_mismatches"),
+    ({"add_unexpected": True}, "unexpected"),
+])
+def test_checkpoint_loader_reports_incompatibilities(tmp_path, kwargs, report_field):
+    _write_synthetic_original_checkpoint(tmp_path, **kwargs)
+    with pytest.raises(CheckpointCompatibilityError) as exc:
+        QuranMultiLevelCTC.from_pretrained_checkpoint(tmp_path)
+    assert getattr(exc.value.report, report_field)
 
 
 def test_waveform_adapter_uses_stage5_float_audio():

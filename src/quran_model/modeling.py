@@ -1,10 +1,14 @@
 """Reference-shaped multi-level CTC model on Wav2Vec2-BERT features."""
 
 from dataclasses import dataclass
+import json
+from pathlib import Path
 
 import torch
 from torch import nn
-from transformers import Wav2Vec2BertModel
+from huggingface_hub import hf_hub_download
+from safetensors import safe_open
+from transformers import Wav2Vec2BertConfig, Wav2Vec2BertModel
 from transformers.modeling_outputs import ModelOutput
 from transformers.modeling_utils import PreTrainedModel
 
@@ -23,6 +27,34 @@ class QuranMultiLevelCTCOutput(ModelOutput):
     attentions: tuple[torch.FloatTensor, ...] | None = None
 
 
+@dataclass(frozen=True)
+class CheckpointLoadReport:
+    """Explicit key and shape audit for an upstream checkpoint load."""
+
+    checkpoint: str
+    matched: tuple[tuple[str, str], ...]
+    missing: tuple[str, ...]
+    unexpected: tuple[str, ...]
+    shape_mismatches: tuple[str, ...]
+    loaded_parameter_count: int
+
+    @property
+    def is_complete(self):
+        return not self.missing and not self.unexpected and not self.shape_mismatches
+
+
+class CheckpointCompatibilityError(RuntimeError):
+    """A checkpoint did not exactly match the model's parameters."""
+
+    def __init__(self, report: CheckpointLoadReport):
+        self.report = report
+        super().__init__(
+            "Checkpoint parameter mismatch: "
+            f"{len(report.missing)} missing, {len(report.unexpected)} unexpected, "
+            f"{len(report.shape_mismatches)} shape mismatches"
+        )
+
+
 class QuranMultiLevelCTC(PreTrainedModel):
     """Eleven CTC heads over the original Wav2Vec2-BERT encoder.
 
@@ -34,6 +66,7 @@ class QuranMultiLevelCTC(PreTrainedModel):
     config_class = QuranMultiLevelCTCConfig
     base_model_prefix = "encoder"
     main_input_name = "input_features"
+    supports_gradient_checkpointing = True
 
     def __init__(self, config: QuranMultiLevelCTCConfig):
         super().__init__(config)
@@ -47,25 +80,103 @@ class QuranMultiLevelCTC(PreTrainedModel):
         self.post_init()
 
     @classmethod
-    def from_pretrained_encoder(cls, checkpoint, config=None, **kwargs):
-        """Initialize this model then load only its Wav2Vec2-BERT encoder weights."""
-        if config is None:
-            from transformers import Wav2Vec2BertConfig
-            try:
-                enc_config = Wav2Vec2BertConfig.from_pretrained(checkpoint)
-            except ValueError:
-                # The published Muaalem checkpoint identifies itself as a custom
-                # model type. Its encoder architecture is Wav2Vec2-BERT; use the
-                # base checkpoint config unless the caller passes the exact one.
-                enc_config = Wav2Vec2BertConfig.from_pretrained(
-                    "facebook/wav2vec2-bert-rel-pos-large"
-                )
-            config = QuranMultiLevelCTCConfig(encoder_config=enc_config)
-        model = cls(config)
-        model.encoder = Wav2Vec2BertModel.from_pretrained(
-            checkpoint, config=config.make_encoder_config(), **kwargs
+    def from_pretrained_checkpoint(
+        cls, checkpoint, *, revision=None, local_files_only=False, device="cpu"
+    ):
+        """Load and audit the original Muaalem checkpoint, including all CTC heads.
+
+        The source encoder prefix ``wav2vec2_bert.`` is mapped explicitly to this
+        model's ``encoder.`` prefix. Safetensors are read tensor-by-tensor, so a
+        second complete checkpoint-sized state dictionary is not held in memory.
+        Returns ``(model, report)``. Loading raises with the complete report on
+        any missing, unexpected, or shape-incompatible tensor; partial/random
+        initialization is never returned as a successful checkpoint load.
+        """
+        checkpoint_label = str(checkpoint)
+        local = Path(checkpoint)
+        if local.is_dir():
+            config_path = local / "config.json"
+            weights_path = local / "model.safetensors"
+        else:
+            config_path = Path(hf_hub_download(
+                repo_id=checkpoint, filename="config.json", revision=revision,
+                local_files_only=local_files_only,
+            ))
+            weights_path = Path(hf_hub_download(
+                repo_id=checkpoint, filename="model.safetensors", revision=revision,
+                local_files_only=local_files_only,
+            ))
+        raw_config = json.loads(config_path.read_text(encoding="utf-8"))
+        defaults = Wav2Vec2BertConfig().to_dict()
+        encoder_config = Wav2Vec2BertConfig.from_dict({
+            key: value for key, value in raw_config.items() if key in defaults
+        })
+        config = QuranMultiLevelCTCConfig(
+            encoder_config=encoder_config,
+            level_to_vocab_size=raw_config["level_to_vocab_size"],
+            level_to_loss_weight=raw_config.get("level_to_loss_weight"),
+            final_dropout=raw_config.get("final_dropout", 0.1),
+            pad_token_id=raw_config.get("pad_token_id", 0),
+            ctc_loss_reduction=raw_config.get("ctc_loss_reduction", "mean"),
+            ctc_zero_infinity=raw_config.get("ctc_zero_infinity", False),
         )
-        return model
+
+        # Build only tensor metadata first. No random 660M-parameter allocation
+        # is needed unless the key/shape audit has passed.
+        with torch.device("meta"):
+            model = cls(config)
+        target_state = model.state_dict()
+        target_shapes = {key: tuple(value.shape) for key, value in target_state.items()}
+        source_to_target = {}
+        source_shapes = {}
+        with safe_open(str(weights_path), framework="pt", device="cpu") as source:
+            source_keys = source.keys()
+            for source_key in source_keys:
+                if source_key.startswith("wav2vec2_bert."):
+                    target_key = "encoder." + source_key.removeprefix("wav2vec2_bert.")
+                elif source_key.startswith("level_to_lm_head."):
+                    target_key = source_key
+                else:
+                    target_key = None
+                if target_key is not None:
+                    source_to_target[source_key] = target_key
+                    source_shapes[source_key] = tuple(source.get_slice(source_key).get_shape())
+
+        expected = set(target_shapes)
+        mapped_targets = set(source_to_target.values())
+        missing = tuple(sorted(expected - mapped_targets))
+        unexpected = tuple(sorted(set(source_keys) - set(source_to_target)))
+        mismatches = tuple(sorted(
+            f"{source_key} -> {target_key}: checkpoint {source_shapes[source_key]}, "
+            f"model {target_shapes[target_key]}"
+            for source_key, target_key in source_to_target.items()
+            if source_shapes[source_key] != target_shapes[target_key]
+        ))
+        matched_pairs = tuple(sorted(
+            (source_key, target_key)
+            for source_key, target_key in source_to_target.items()
+            if source_shapes[source_key] == target_shapes[target_key]
+        ))
+        loaded_count = sum(
+            int(torch.tensor(target_shapes[target_key]).prod().item())
+            for _, target_key in matched_pairs
+        )
+        report = CheckpointLoadReport(
+            checkpoint=checkpoint_label, matched=matched_pairs, missing=missing,
+            unexpected=unexpected, shape_mismatches=mismatches,
+            loaded_parameter_count=loaded_count,
+        )
+        if not report.is_complete:
+            raise CheckpointCompatibilityError(report)
+
+        model.to_empty(device="cpu")
+        model_state = model.state_dict()
+        with safe_open(str(weights_path), framework="pt", device="cpu") as source:
+            with torch.no_grad():
+                for source_key, target_key in matched_pairs:
+                    model_state[target_key].copy_(source.get_tensor(source_key))
+        model.to(device)
+        return model, report
 
     def _output_lengths(self, input_features, attention_mask):
         if attention_mask is None:
@@ -80,7 +191,8 @@ class QuranMultiLevelCTC(PreTrainedModel):
         return self.encoder._get_feat_extract_output_lengths(feature_lengths).to(torch.long)
 
     def forward(
-        self, input_features, attention_mask=None, labels=None,
+        self, input_features, attention_mask=None, input_lengths=None, labels=None,
+        target_lengths=None, label_level_mask=None,
         output_attentions=None, output_hidden_states=None, return_dict=True,
     ):
         """Run all heads and optionally compute CTC loss for supplied levels.
@@ -94,16 +206,45 @@ class QuranMultiLevelCTC(PreTrainedModel):
         expected_dim = self.config.encoder_config["feature_projection_input_dim"]
         if input_features.shape[-1] != expected_dim:
             raise ValueError(f"Expected {expected_dim} feature channels; got {input_features.shape[-1]}")
+        if input_lengths is not None:
+            provided_input_lengths = torch.as_tensor(input_lengths, device=input_features.device)
+            actual_input_lengths = (
+                attention_mask.to(torch.long).sum(dim=-1)
+                if attention_mask is not None
+                else torch.full_like(provided_input_lengths, input_features.shape[1])
+            )
+            if provided_input_lengths.shape != actual_input_lengths.shape or not torch.equal(
+                provided_input_lengths.to(torch.long), actual_input_lengths
+            ):
+                raise ValueError("input_lengths must match the feature-frame attention_mask lengths")
         if labels is not None:
+            if not isinstance(labels, dict) or not labels:
+                raise ValueError("labels must be a non-empty level-to-target mapping")
             unknown = set(labels) - set(self.config.level_to_vocab_size)
             if unknown:
                 raise ValueError(f"Unknown label levels: {sorted(unknown)}")
+            if label_level_mask is not None:
+                unknown_masks = set(label_level_mask) - set(labels)
+                if unknown_masks:
+                    raise ValueError(f"Level masks supplied without labels: {sorted(unknown_masks)}")
             for level, target in labels.items():
                 if target.ndim != 2 or target.shape[0] != input_features.shape[0]:
                     raise ValueError(f"Labels for {level} must have shape (batch, target_length)")
                 valid = target[target != self.config.label_pad_token_id]
                 if valid.numel() and (valid.min() < 1 or valid.max() >= self.config.level_to_vocab_size[level]):
                     raise ValueError(f"Valid {level} target IDs must be in [1, {self.config.level_to_vocab_size[level] - 1}]")
+                supervised = self._level_supervision_mask(level, label_level_mask, target.shape[0], target.device)
+                if torch.any((~supervised) & (target != self.config.label_pad_token_id).any(dim=-1)):
+                    raise ValueError(f"Unsupervised {level} rows must contain only ignored padding")
+                if target_lengths is not None and level in target_lengths:
+                    supplied_lengths = torch.as_tensor(target_lengths[level], device=target.device).to(torch.long)
+                    actual_lengths = (target != self.config.label_pad_token_id).sum(dim=-1)
+                    if supplied_lengths.shape != actual_lengths.shape or not torch.equal(supplied_lengths, actual_lengths):
+                        raise ValueError(f"target_lengths[{level!r}] do not match non-padding labels")
+            if target_lengths is not None and set(target_lengths) - set(labels):
+                raise ValueError("target_lengths contains a level without labels")
+            if not any(self._level_supervision_mask(level, label_level_mask, input_features.shape[0], input_features.device).any() for level in labels):
+                raise ValueError("At least one level and example must have supervised labels")
 
         enc = self.encoder(
             input_features=input_features, attention_mask=attention_mask,
@@ -118,13 +259,17 @@ class QuranMultiLevelCTC(PreTrainedModel):
         if labels is not None:
             loss = hidden.new_zeros((), dtype=torch.float32)
             for level, target in labels.items():
+                supervised = self._level_supervision_mask(level, label_level_mask, target.shape[0], target.device)
+                if not supervised.any():
+                    continue
+                target = target[supervised]
                 valid = target != self.config.label_pad_token_id
                 target_lengths = valid.sum(dim=-1).to(torch.long)
                 flat_targets = target.masked_select(valid).to(torch.long)
-                log_probs = logits[level].log_softmax(dim=-1, dtype=torch.float32).transpose(0, 1)
+                log_probs = logits[level][supervised].log_softmax(dim=-1, dtype=torch.float32).transpose(0, 1)
                 with torch.backends.cudnn.flags(enabled=False):
                     level_loss = nn.functional.ctc_loss(
-                        log_probs, flat_targets, lengths, target_lengths,
+                        log_probs, flat_targets, lengths[supervised], target_lengths,
                         blank=self.config.pad_token_id,
                         reduction=self.config.ctc_loss_reduction,
                         zero_infinity=self.config.ctc_zero_infinity,
@@ -138,6 +283,15 @@ class QuranMultiLevelCTC(PreTrainedModel):
             encoder_last_hidden_state=enc.last_hidden_state,
             hidden_states=enc.hidden_states, attentions=enc.attentions,
         )
+
+    @staticmethod
+    def _level_supervision_mask(level, label_level_mask, batch_size, device):
+        if label_level_mask is None or level not in label_level_mask:
+            return torch.ones(batch_size, dtype=torch.bool, device=device)
+        mask = torch.as_tensor(label_level_mask[level], dtype=torch.bool, device=device)
+        if mask.ndim != 1 or mask.shape[0] != batch_size:
+            raise ValueError(f"label_level_mask[{level!r}] must have shape ({batch_size},)")
+        return mask
 
     def forward_waveforms(self, waveforms, sampling_rate, feature_extractor, **forward_kwargs):
         """Run Stage 5 float waveform batches through the reference HF extractor."""

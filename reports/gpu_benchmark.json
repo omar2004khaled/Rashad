@@ -1,0 +1,118 @@
+{
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "torch_version": "2.11.0+cu128",
+  "cuda_version": "12.8",
+  "training_config": {
+    "mode": "full_finetune",
+    "optimizer": "adamw",
+    "learning_rate": 1e-05,
+    "weight_decay": 0.01,
+    "scheduler": "linear",
+    "warmup_ratio": 0.05,
+    "gradient_accumulation_steps": 16,
+    "max_grad_norm": 1.0,
+    "mixed_precision": "fp16",
+    "gradient_checkpointing": true,
+    "micro_batch_size": 1,
+    "epochs": 5,
+    "evaluation_steps": 500,
+    "checkpoint_steps": 500,
+    "seed": 42,
+    "num_workers": 0
+  },
+  "verified_checkpoint": "obadx/muaalem-model-v3_2",
+  "checkpoint_revision": "01a1ef9fbe40d144ef845101e89ff924aed3fef5",
+  "checkpoint_load": {
+    "complete": true,
+    "matched_tensors": 816,
+    "loaded_parameter_count": 605754251,
+    "missing": [],
+    "unexpected": [],
+    "shape_mismatches": []
+  },
+  "real_sample": {
+    "examples": [
+      {
+        "configuration": "moshaf_0.1",
+        "source_key": "moshaf_0.1:0.1:001.0000",
+        "duration_seconds": 6.06,
+        "sampling_rate": 16000
+      },
+      {
+        "configuration": "moshaf_0.1",
+        "source_key": "moshaf_0.1:0.1:001.0001",
+        "duration_seconds": 6.02,
+        "sampling_rate": 16000
+      },
+      {
+        "configuration": "moshaf_0.1",
+        "source_key": "moshaf_0.1:0.1:001.0002",
+        "duration_seconds": 6.28,
+        "sampling_rate": 16000
+      }
+    ],
+    "scanned_rows": 3,
+    "excluded_rows": []
+  },
+  "full_finetune": {
+    "mode": "full_finetune",
+    "gradient_checkpointing": true,
+    "mixed_precision": "fp16 autocast",
+    "status": "completed",
+    "trainable_parameters": 605754251,
+    "micro_batch_size": 1,
+    "feature_frames_by_example": [
+      302,
+      300,
+      313
+    ],
+    "steps": 3,
+    "loss": 0.0001984923001145944,
+    "finite_loss": true,
+    "forward_seconds_mean": 1.5083802999997715,
+    "backward_seconds_mean": 2.3169976333338127,
+    "optimizer_step_seconds_mean": 3.975804433332693,
+    "step_seconds_mean": 7.801182366666278,
+    "examples_per_second": 0.12818569711597905,
+    "parameter_update_verified": true,
+    "gradient_present": true,
+    "scaler_scale": 65536.0,
+    "peak_allocated_bytes": 12137777664,
+    "peak_reserved_bytes": 12314476544,
+    "current_allocated_bytes": 9714047488,
+    "gpu_total_bytes": 6441926656,
+    "nvidia_smi_peak_used_mib": 5977,
+    "nvidia_smi_samples": 89
+  },
+  "frozen_encoder_comparison": {
+    "mode": "frozen_encoder",
+    "gradient_checkpointing": false,
+    "mixed_precision": "fp16 autocast",
+    "status": "completed",
+    "trainable_parameters": 76875,
+    "micro_batch_size": 1,
+    "feature_frames_by_example": [
+      302,
+      300,
+      313
+    ],
+    "steps": 3,
+    "loss": 0.0002896824153140187,
+    "finite_loss": true,
+    "forward_seconds_mean": 0.08246333333408984,
+    "backward_seconds_mean": 0.009139633333082505,
+    "optimizer_step_seconds_mean": 0.002454266666973126,
+    "step_seconds_mean": 0.09405723333414547,
+    "examples_per_second": 10.631824523770797,
+    "parameter_update_verified": true,
+    "gradient_present": true,
+    "scaler_scale": 65536.0,
+    "peak_allocated_bytes": 2498634240,
+    "peak_reserved_bytes": 2533359616,
+    "current_allocated_bytes": 2444099072,
+    "gpu_total_bytes": 6441926656,
+    "nvidia_smi_peak_used_mib": 2563,
+    "nvidia_smi_samples": 2
+  },
+  "note": "3 microbatches from 3 real examples per mode; no epoch or corpus training was run."
+}

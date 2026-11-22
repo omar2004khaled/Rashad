@@ -16,6 +16,7 @@ from .splitting import (
     expected_random_segment_group_leakage,
 )
 from .batching import PaddedTargets, pad_label_batch, pad_sequences
+from .collation import QuranTrainingCollator
 from .statistics import DatasetStatistics
 
 __all__ = [
@@ -24,5 +25,6 @@ __all__ = [
     "TrainingExample", "prepare_record", "assign_record_split",
     "assert_no_group_leakage", "build_reciter_split_manifest",
     "expected_random_segment_group_leakage",
-    "PaddedTargets", "pad_label_batch", "pad_sequences", "DatasetStatistics",
+    "PaddedTargets", "pad_label_batch", "pad_sequences", "QuranTrainingCollator",
+    "DatasetStatistics",
 ]

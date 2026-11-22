@@ -1,0 +1,18 @@
+{
+  "mode": "full_finetune",
+  "optimizer": "adamw",
+  "learning_rate": 0.00001,
+  "weight_decay": 0.01,
+  "scheduler": "linear",
+  "warmup_ratio": 0.05,
+  "gradient_accumulation_steps": 16,
+  "max_grad_norm": 1.0,
+  "mixed_precision": "fp16",
+  "gradient_checkpointing": true,
+  "micro_batch_size": 1,
+  "epochs": 5,
+  "evaluation_steps": 500,
+  "checkpoint_steps": 500,
+  "seed": 42,
+  "num_workers": 0
+}
