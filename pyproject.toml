@@ -16,6 +16,8 @@ dependencies = [
   "requests>=2.31,<3",
   "scipy>=1.11,<2",
   "soundfile>=0.12,<1",
+  "torch>=2.0",
+  "transformers>=4.45,<6",
 ]
 
 [project.optional-dependencies]
