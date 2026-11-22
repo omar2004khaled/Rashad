@@ -1,0 +1,17 @@
+{
+  "audio_preprocessing_config": "configs/audio_preprocessing.json",
+  "dataset_config": "configs/dataset.json",
+  "default_split_manifest": "configs/reciter_split_manifest.json",
+  "inclusion_policy": {
+    "include_non_quran": true,
+    "expected_sample_rate": 16000,
+    "require_mono": true,
+    "min_match_ratio": null,
+    "min_duration_seconds": null,
+    "max_duration_seconds": null,
+    "on_missing_annotation": "exclude",
+    "on_invalid_annotation": "exclude"
+  },
+  "default_limit_per_configuration": 3,
+  "source_annotations_are_immutable": true
+}

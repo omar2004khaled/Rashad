@@ -1,0 +1,276 @@
+{
+  "dataset_id": "obadx/muaalem-annotated-v3",
+  "dataset_revision": "8e3fe50ec5efcc4beab054acdbd0178bc690c246",
+  "seed": 42,
+  "grouping_key": "reciter_id",
+  "strategy": "reciter-group holdout; exhaustive validation/test group search minimizing squared row-fraction deviation",
+  "target_ratios": {
+    "train": 0.8,
+    "validation": 0.1,
+    "test": 0.1
+  },
+  "actual_source_row_counts": {
+    "train": 228941,
+    "validation": 29125,
+    "test": 28471
+  },
+  "source_row_count_total": 286537,
+  "groups": [
+    {
+      "reciter_id": 0,
+      "english_name": "Mahmoud Khalil Al-Husari",
+      "moshaf_ids": [
+        "0.0",
+        "0.1",
+        "0.2",
+        "0.3"
+      ],
+      "row_count": 42472,
+      "split": "train"
+    },
+    {
+      "reciter_id": 1,
+      "english_name": "Mohammed Sidiq Al-Minshawi",
+      "moshaf_ids": [
+        "1.0"
+      ],
+      "row_count": 10939,
+      "split": "train"
+    },
+    {
+      "reciter_id": 2,
+      "english_name": "Abdul Basit Abdus Samad",
+      "moshaf_ids": [
+        "2.0",
+        "2.1"
+      ],
+      "row_count": 20336,
+      "split": "train"
+    },
+    {
+      "reciter_id": 3,
+      "english_name": "Mahmoud Ali Al-Banna",
+      "moshaf_ids": [
+        "3.0"
+      ],
+      "row_count": 10444,
+      "split": "train"
+    },
+    {
+      "reciter_id": 4,
+      "english_name": "Mustafa Ismail",
+      "moshaf_ids": [
+        "4.0"
+      ],
+      "row_count": 10994,
+      "split": "train"
+    },
+    {
+      "reciter_id": 5,
+      "english_name": "Ahmed Mohamed Amer",
+      "moshaf_ids": [
+        "5.0"
+      ],
+      "row_count": 11482,
+      "split": "train"
+    },
+    {
+      "reciter_id": 6,
+      "english_name": "Ayman Rushdi Swaid",
+      "moshaf_ids": [
+        "6.0"
+      ],
+      "row_count": 12435,
+      "split": "train"
+    },
+    {
+      "reciter_id": 7,
+      "english_name": "Ahmed Issa Al-Ma'srawi",
+      "moshaf_ids": [
+        "7.0"
+      ],
+      "row_count": 9907,
+      "split": "test"
+    },
+    {
+      "reciter_id": 8,
+      "english_name": "Ali Al-Hudhaify",
+      "moshaf_ids": [
+        "8.0"
+      ],
+      "row_count": 10330,
+      "split": "train"
+    },
+    {
+      "reciter_id": 9,
+      "english_name": "Mahmoud Abdel-Hakam",
+      "moshaf_ids": [
+        "9.0"
+      ],
+      "row_count": 10642,
+      "split": "test"
+    },
+    {
+      "reciter_id": 11,
+      "english_name": "Abdel Rashid Soufi",
+      "moshaf_ids": [
+        "11.0"
+      ],
+      "row_count": 10363,
+      "split": "train"
+    },
+    {
+      "reciter_id": 12,
+      "english_name": "Mohammed Ayoub",
+      "moshaf_ids": [
+        "12.0"
+      ],
+      "row_count": 9880,
+      "split": "validation"
+    },
+    {
+      "reciter_id": 13,
+      "english_name": "Ibrahim Al-Akhdar",
+      "moshaf_ids": [
+        "13.0"
+      ],
+      "row_count": 9377,
+      "split": "validation"
+    },
+    {
+      "reciter_id": 19,
+      "english_name": "Mishary Rashid Al-Fasi",
+      "moshaf_ids": [
+        "19.0"
+      ],
+      "row_count": 11278,
+      "split": "train"
+    },
+    {
+      "reciter_id": 22,
+      "english_name": "Ahmed Khalil Shaheen",
+      "moshaf_ids": [
+        "22.0"
+      ],
+      "row_count": 10332,
+      "split": "train"
+    },
+    {
+      "reciter_id": 24,
+      "english_name": "Khalifa A-Tunaiji",
+      "moshaf_ids": [
+        "24.0"
+      ],
+      "row_count": 9868,
+      "split": "validation"
+    },
+    {
+      "reciter_id": 25,
+      "english_name": "Yasser Slama",
+      "moshaf_ids": [
+        "25.0"
+      ],
+      "row_count": 7922,
+      "split": "test"
+    },
+    {
+      "reciter_id": 26,
+      "english_name": "Saber Abd El-Hakam",
+      "moshaf_ids": [
+        "26.0",
+        "26.1"
+      ],
+      "row_count": 23415,
+      "split": "train"
+    },
+    {
+      "reciter_id": 27,
+      "english_name": "Ahmed Al-Rozayky",
+      "moshaf_ids": [
+        "27.0"
+      ],
+      "row_count": 11213,
+      "split": "train"
+    },
+    {
+      "reciter_id": 28,
+      "english_name": "Ahmed Mohammed Slamah",
+      "moshaf_ids": [
+        "28.0"
+      ],
+      "row_count": 10535,
+      "split": "train"
+    },
+    {
+      "reciter_id": 29,
+      "english_name": "Ahmed Neanea",
+      "moshaf_ids": [
+        "29.0"
+      ],
+      "row_count": 11061,
+      "split": "train"
+    },
+    {
+      "reciter_id": 30,
+      "english_name": "Ali Haggag Al-Swisie",
+      "moshaf_ids": [
+        "30.0"
+      ],
+      "row_count": 11312,
+      "split": "train"
+    }
+  ],
+  "reciter_id_to_split": {
+    "0": "train",
+    "1": "train",
+    "2": "train",
+    "3": "train",
+    "4": "train",
+    "5": "train",
+    "6": "train",
+    "7": "test",
+    "8": "train",
+    "9": "test",
+    "11": "train",
+    "12": "validation",
+    "13": "validation",
+    "19": "train",
+    "22": "train",
+    "24": "validation",
+    "25": "test",
+    "26": "train",
+    "27": "train",
+    "28": "train",
+    "29": "train",
+    "30": "train"
+  },
+  "moshaf_id_to_split": {
+    "0.0": "train",
+    "0.1": "train",
+    "0.2": "train",
+    "0.3": "train",
+    "1.0": "train",
+    "11.0": "train",
+    "12.0": "validation",
+    "13.0": "validation",
+    "19.0": "train",
+    "2.0": "train",
+    "2.1": "train",
+    "22.0": "train",
+    "24.0": "validation",
+    "25.0": "test",
+    "26.0": "train",
+    "26.1": "train",
+    "27.0": "train",
+    "28.0": "train",
+    "29.0": "train",
+    "3.0": "train",
+    "30.0": "train",
+    "4.0": "train",
+    "5.0": "train",
+    "6.0": "train",
+    "7.0": "test",
+    "8.0": "train",
+    "9.0": "test"
+  }
+}

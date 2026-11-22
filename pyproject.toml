@@ -12,7 +12,7 @@ dependencies = [
   "huggingface_hub>=1.0,<2",
   "numpy>=1.26,<3",
   "pandas>=2.0,<4",
-  "quran-transcript>=0.6.1,<0.7",
+  "quran-transcript==0.6.1",
   "requests>=2.31,<3",
   "scipy>=1.11,<2",
   "soundfile>=0.12,<1",
