@@ -6,9 +6,11 @@ from pathlib import Path
 
 import torch
 from torch import nn
+from torch.nn import functional as F
 from huggingface_hub import hf_hub_download
 from safetensors import safe_open
 from transformers import Wav2Vec2BertConfig, Wav2Vec2BertModel
+from transformers.models.wav2vec2_bert.modeling_wav2vec2_bert import Wav2Vec2BertSelfAttention
 from transformers.modeling_outputs import ModelOutput
 from transformers.modeling_utils import PreTrainedModel
 
@@ -55,6 +57,86 @@ class CheckpointCompatibilityError(RuntimeError):
         )
 
 
+class _SDPAWav2Vec2BertSelfAttention(Wav2Vec2BertSelfAttention):
+    """Wav2Vec2-BERT self-attention using PyTorch SDPA when weights are not requested.
+
+    The upstream Transformers 5.8.1 implementation materializes both attention
+    scores and softmax probabilities. For this checkpoint's ``relative_key``
+    positions, the positional term is an additive attention bias and can be
+    passed to scaled-dot-product attention without changing the score equation.
+    """
+
+    def forward(
+        self,
+        hidden_states,
+        attention_mask=None,
+        relative_position_embeddings=None,
+        output_attentions=False,
+    ):
+        # Preserve the upstream attention map convention and its less common
+        # relative-position implementation exactly when callers request weights.
+        if output_attentions or self.position_embeddings_type == "relative":
+            return super().forward(
+                hidden_states,
+                attention_mask=attention_mask,
+                relative_position_embeddings=relative_position_embeddings,
+                output_attentions=output_attentions,
+            )
+
+        batch_size, sequence_length, _ = hidden_states.size()
+        query_key_states = hidden_states
+        if self.position_embeddings_type == "rotary":
+            if relative_position_embeddings is None:
+                raise ValueError("relative_position_embeddings are required for rotary attention")
+            query_key_states = self._apply_rotary_embedding(
+                query_key_states, relative_position_embeddings
+            )
+
+        query = self.linear_q(query_key_states).view(
+            batch_size, sequence_length, self.num_heads, self.head_size
+        ).transpose(1, 2)
+        key = self.linear_k(query_key_states).view(
+            batch_size, sequence_length, self.num_heads, self.head_size
+        ).transpose(1, 2)
+        value = self.linear_v(hidden_states).view(
+            batch_size, sequence_length, self.num_heads, self.head_size
+        ).transpose(1, 2)
+
+        attention_bias = attention_mask
+        if self.position_embeddings_type == "relative_key":
+            query_length, key_length = query.shape[2], key.shape[2]
+            position_ids_l = torch.arange(
+                query_length, dtype=torch.long, device=hidden_states.device
+            ).view(-1, 1)
+            position_ids_r = torch.arange(
+                key_length, dtype=torch.long, device=hidden_states.device
+            ).view(1, -1)
+            distance = position_ids_r - position_ids_l
+            distance = torch.clamp(
+                distance, -self.left_max_position_embeddings,
+                self.right_max_position_embeddings,
+            )
+            positional_embedding = self.distance_embedding(
+                distance + self.left_max_position_embeddings
+            ).to(dtype=query.dtype)
+            relative_bias = torch.einsum(
+                "bhld,lrd->bhlr", query, positional_embedding
+            ) / (self.head_size ** 0.5)
+            attention_bias = relative_bias if attention_bias is None else attention_bias + relative_bias
+
+        context = F.scaled_dot_product_attention(
+            query,
+            key,
+            value,
+            attn_mask=attention_bias,
+            dropout_p=self.dropout.p if self.training else 0.0,
+        )
+        context = context.transpose(1, 2).reshape(
+            batch_size, sequence_length, self.num_heads * self.head_size
+        )
+        return self.linear_out(context), None
+
+
 class QuranMultiLevelCTC(PreTrainedModel):
     """Eleven CTC heads over the original Wav2Vec2-BERT encoder.
 
@@ -71,6 +153,7 @@ class QuranMultiLevelCTC(PreTrainedModel):
     def __init__(self, config: QuranMultiLevelCTCConfig):
         super().__init__(config)
         self.encoder = Wav2Vec2BertModel(config.make_encoder_config())
+        self.set_attention_implementation(config.attention_implementation)
         self.dropout = nn.Dropout(config.final_dropout)
         output_dim = config.encoder_config.get("output_hidden_size") or config.encoder_config["hidden_size"]
         self.level_to_lm_head = nn.ModuleDict({
@@ -78,6 +161,34 @@ class QuranMultiLevelCTC(PreTrainedModel):
             for level, size in config.level_to_vocab_size.items()
         })
         self.post_init()
+
+    def set_attention_implementation(self, implementation: str) -> None:
+        """Select eager or SDPA attention without changing parameter names or shapes."""
+        if implementation not in {"eager", "sdpa"}:
+            raise ValueError("attention implementation must be 'eager' or 'sdpa'")
+        for layer in self.encoder.encoder.layers:
+            attention = layer.self_attn
+            position_type = attention.position_embeddings_type
+            if implementation == "sdpa" and position_type == "relative":
+                raise ValueError(
+                    "SDPA is not implemented for Wav2Vec2-BERT position_embeddings_type='relative'"
+                )
+            if implementation == "sdpa":
+                attention.__class__ = _SDPAWav2Vec2BertSelfAttention
+            elif isinstance(attention, _SDPAWav2Vec2BertSelfAttention):
+                attention.__class__ = Wav2Vec2BertSelfAttention
+        self.config.attention_implementation = implementation
+
+    def attention_implementation_status(self) -> dict[str, int | str]:
+        sdpa_layers = sum(
+            isinstance(layer.self_attn, _SDPAWav2Vec2BertSelfAttention)
+            for layer in self.encoder.encoder.layers
+        )
+        return {
+            "configured": self.config.attention_implementation,
+            "sdpa_layers": sdpa_layers,
+            "eager_layers": len(self.encoder.encoder.layers) - sdpa_layers,
+        }
 
     @classmethod
     def from_pretrained_checkpoint(
@@ -169,13 +280,13 @@ class QuranMultiLevelCTC(PreTrainedModel):
         if not report.is_complete:
             raise CheckpointCompatibilityError(report)
 
-        model.to_empty(device="cpu")
+        target_device = torch.device(device)
+        model.to_empty(device=target_device)
         model_state = model.state_dict()
         with safe_open(str(weights_path), framework="pt", device="cpu") as source:
             with torch.no_grad():
                 for source_key, target_key in matched_pairs:
                     model_state[target_key].copy_(source.get_tensor(source_key))
-        model.to(device)
         return model, report
 
     def _output_lengths(self, input_features, attention_mask):

@@ -18,6 +18,13 @@ from .splitting import (
 from .batching import PaddedTargets, pad_label_batch, pad_sequences
 from .collation import QuranTrainingCollator
 from .statistics import DatasetStatistics
+from .pilot_preflight import (
+    MAX_DECODED_DURATION_SECONDS,
+    decoded_duration_rejection,
+    duration_group,
+    duration_rejection_reason,
+    select_preflight_examples,
+)
 
 __all__ = [
     "CTC_BLANK_ID", "IGNORE_INDEX", "PAD_ID", "LabelCodec", "UnknownLabelError",
@@ -26,5 +33,6 @@ __all__ = [
     "assert_no_group_leakage", "build_reciter_split_manifest",
     "expected_random_segment_group_leakage",
     "PaddedTargets", "pad_label_batch", "pad_sequences", "QuranTrainingCollator",
-    "DatasetStatistics",
+    "DatasetStatistics", "MAX_DECODED_DURATION_SECONDS", "decoded_duration_rejection",
+    "duration_group", "duration_rejection_reason", "select_preflight_examples",
 ]

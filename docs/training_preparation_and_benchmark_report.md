@@ -1,6 +1,6 @@
 # Stage 7 — Part A: Training preparation and GPU benchmark
 
-**Scope:** verify the original weights, implement batching/configuration/checkpoint resume, and run one controlled training step on a real sample. No epoch or full-dataset training was performed; only one audio sample was decoded for the benchmark.
+**Scope:** verify original weights, implement batching/configuration/checkpoint resume, and run a controlled three-step benchmark using three distinct real training examples per configuration. No epoch or full-dataset training was performed.
 
 ## Existing work reviewed
 
@@ -115,6 +115,6 @@ These are arithmetic extrapolations from three clips of 6.02–6.28 seconds, not
 - Original cached checkpoint: exact mapping verified, 816 tensor matches, no missing/unexpected/mismatched keys.
 - `tests/test_model.py`, `tests/test_training_collation.py`, and `tests/test_training_checkpointing.py`: automated coverage for mapping, model loss masks, variable lengths, config, and restart state.
 - Final verification: `py -m pytest tests/test_model.py tests/test_training_collation.py tests/test_training_checkpointing.py -q` — **24 passed**; full `py -m pytest -q` — **91 passed**.
-- One real training example and a one-step GPU benchmark were used; no epoch, filtering census, or full dataset download occurred.
+- Three real training examples and three optimizer updates were used; no epoch, filtering census, or full dataset download occurred.
 
 Before Part B, decide whether to keep full fine-tuning and adopt a memory strategy that fits the 6 GiB limit, or explicitly approve frozen/partially frozen encoder training as a different objective. Also establish the eligible training-row count and tune settings using validation data. No Part B training was started.

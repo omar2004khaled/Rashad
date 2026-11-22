@@ -10,7 +10,7 @@ from quran_model.configuration import REFERENCE_LEVEL_TO_VOCAB_SIZE
 from quran_training_data.encoding import LabelCodec
 
 
-def tiny_config(add_adapter=False):
+def tiny_config(add_adapter=False, attention_implementation="sdpa"):
     encoder = Wav2Vec2BertConfig(
         hidden_size=16,
         num_hidden_layers=1,
@@ -31,7 +31,10 @@ def tiny_config(add_adapter=False):
         adapter_kernel_size=3,
         adapter_stride=2,
     )
-    return QuranMultiLevelCTCConfig(encoder_config=encoder, final_dropout=0.0)
+    return QuranMultiLevelCTCConfig(
+        encoder_config=encoder, final_dropout=0.0,
+        attention_implementation=attention_implementation,
+    )
 
 
 def test_init_and_forward_shapes_all_eleven_heads():
@@ -57,6 +60,7 @@ def test_default_config_matches_published_checkpoint_encoder():
     assert config.encoder_config["adapter_stride"] == 2
     assert config.level_to_loss_weight["phonemes"] == 0.4
     assert config.level_to_loss_weight["shidda_or_rakhawa"] == 0.0605
+    assert config.attention_implementation == "sdpa"
 
 
 def test_explicit_ctc_reduction_is_preserved():
@@ -137,6 +141,63 @@ def test_gradient_checkpointing_can_be_enabled():
     model = QuranMultiLevelCTC(tiny_config())
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     assert model.encoder.encoder.gradient_checkpointing is True
+    assert all(layer.gradient_checkpointing for layer in model.encoder.encoder.layers)
+
+
+def test_sdpa_attention_matches_eager_outputs_losses_and_gradients():
+    torch.manual_seed(12)
+    eager = QuranMultiLevelCTC(tiny_config(attention_implementation="eager")).train()
+    sdpa = QuranMultiLevelCTC(tiny_config(attention_implementation="sdpa")).train()
+    sdpa.load_state_dict(eager.state_dict())
+    assert eager.attention_implementation_status() == {
+        "configured": "eager", "sdpa_layers": 0, "eager_layers": 1,
+    }
+    assert sdpa.attention_implementation_status() == {
+        "configured": "sdpa", "sdpa_layers": 1, "eager_layers": 0,
+    }
+    inputs = torch.randn(1, 12, 160)
+    targets = {"phonemes": torch.tensor([[1, 2, 3]])}
+    torch.manual_seed(44)
+    eager_output = eager(inputs, labels=targets)
+    eager_output.loss.backward()
+    eager_encoder_grad = eager.encoder.feature_projection.projection.weight.grad.detach().clone()
+    eager_head_grad = eager.level_to_lm_head["phonemes"].weight.grad.detach().clone()
+
+    torch.manual_seed(44)
+    sdpa_output = sdpa(inputs, labels=targets)
+    sdpa_output.loss.backward()
+    assert torch.isfinite(eager_output.loss) and torch.isfinite(sdpa_output.loss)
+    torch.testing.assert_close(sdpa_output.logits["phonemes"], eager_output.logits["phonemes"],
+                               rtol=2e-4, atol=2e-5)
+    torch.testing.assert_close(sdpa_output.loss, eager_output.loss, rtol=2e-4, atol=2e-5)
+    torch.testing.assert_close(
+        sdpa.encoder.feature_projection.projection.weight.grad, eager_encoder_grad,
+        rtol=3e-4, atol=3e-5,
+    )
+    torch.testing.assert_close(
+        sdpa.level_to_lm_head["phonemes"].weight.grad, eager_head_grad,
+        rtol=3e-4, atol=3e-5,
+    )
+    assert torch.isfinite(sdpa.encoder.feature_projection.projection.weight.grad).all()
+
+
+def test_sdpa_attention_falls_back_when_attention_maps_requested():
+    model = QuranMultiLevelCTC(tiny_config(attention_implementation="sdpa")).eval()
+    result = model(torch.randn(1, 10, 160), output_attentions=True)
+    assert result.attentions is not None
+    assert len(result.attentions) == 1
+    assert result.attentions[0].shape == (1, 4, 10, 10)
+
+
+def test_attention_backend_config_serializes_and_can_be_changed(tmp_path):
+    model = QuranMultiLevelCTC(tiny_config(attention_implementation="sdpa"))
+    state_keys = set(model.state_dict())
+    model.set_attention_implementation("eager")
+    assert set(model.state_dict()) == state_keys
+    model.save_pretrained(tmp_path, safe_serialization=True)
+    restored = QuranMultiLevelCTC.from_pretrained(tmp_path)
+    assert restored.config.attention_implementation == "eager"
+    assert restored.attention_implementation_status()["sdpa_layers"] == 0
 
 
 def test_config_serialization_round_trip(tmp_path):

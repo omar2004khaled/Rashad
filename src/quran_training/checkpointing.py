@@ -80,7 +80,9 @@ def load_training_checkpoint(
     """Restore weights and optimizer/scheduler state; missing state is an error."""
     if optimizer is None or scheduler is None:
         raise ValueError("optimizer and scheduler are required to resume training")
-    checkpoint = torch.load(path, map_location=map_location, weights_only=False)
+    # mmap prevents eagerly materializing every model/optimizer storage in the
+    # host working set while the destination model and optimizer already exist.
+    checkpoint = torch.load(path, map_location=map_location, weights_only=False, mmap=True)
     for required in ("model", "optimizer", "scheduler", "epoch", "global_step"):
         if required not in checkpoint:
             raise ValueError(f"Training checkpoint is missing required state: {required}")
@@ -97,9 +99,12 @@ def load_training_checkpoint(
         if "rng" not in checkpoint:
             raise ValueError("Training checkpoint is missing RNG states")
         _restore_rng_state(checkpoint["rng"])
-    return {
+    restored = {
         "epoch": int(checkpoint["epoch"]),
         "global_step": int(checkpoint["global_step"]),
         "config": checkpoint.get("config", {}),
         "extra": checkpoint.get("extra", {}),
     }
+    # Ensure mapped checkpoint storages are not held through the next forward.
+    del checkpoint
+    return restored

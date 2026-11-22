@@ -1,11 +1,12 @@
 {
   "mode": "full_finetune",
-  "optimizer": "adamw",
+  "optimizer": "adafactor",
   "learning_rate": 0.00001,
   "weight_decay": 0.01,
   "scheduler": "linear",
   "warmup_ratio": 0.05,
   "gradient_accumulation_steps": 16,
+  "gradient_accumulation_device": "cpu",
   "max_grad_norm": 1.0,
   "mixed_precision": "fp16",
   "gradient_checkpointing": true,

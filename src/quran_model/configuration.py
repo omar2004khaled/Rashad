@@ -88,6 +88,7 @@ class QuranMultiLevelCTCConfig(PretrainedConfig):
         label_pad_token_id=-100,
         ctc_loss_reduction="mean",
         ctc_zero_infinity=False,
+        attention_implementation="sdpa",
         **kwargs,
     ):
         super().__init__(pad_token_id=pad_token_id, **kwargs)
@@ -109,6 +110,9 @@ class QuranMultiLevelCTCConfig(PretrainedConfig):
         self.final_dropout = float(final_dropout)
         self.ctc_loss_reduction = ctc_loss_reduction
         self.ctc_zero_infinity = bool(ctc_zero_infinity)
+        if attention_implementation not in {"eager", "sdpa"}:
+            raise ValueError("attention_implementation must be 'eager' or 'sdpa'")
+        self.attention_implementation = attention_implementation
         weights = dict(level_to_loss_weight or REFERENCE_LEVEL_TO_LOSS_WEIGHT)
         total = sum(weights.values())
         if total > 1.0 + 1e-8:

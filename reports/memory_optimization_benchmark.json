@@ -1,0 +1,917 @@
+{
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "torch_version": "2.11.0+cu128",
+  "cuda_version": "12.8",
+  "training_config": {
+    "mode": "full_finetune",
+    "optimizer": "adafactor",
+    "optimizer_foreach": null,
+    "learning_rate": 1e-05,
+    "weight_decay": 0.01,
+    "scheduler": "linear",
+    "warmup_ratio": 0.05,
+    "gradient_accumulation_steps": 16,
+    "max_grad_norm": 1.0,
+    "mixed_precision": "fp16",
+    "gradient_checkpointing": true,
+    "micro_batch_size": 1,
+    "epochs": 5,
+    "evaluation_steps": 500,
+    "checkpoint_steps": 500,
+    "seed": 42,
+    "num_workers": 0
+  },
+  "verified_checkpoint": "obadx/muaalem-model-v3_2",
+  "checkpoint_revision": "01a1ef9fbe40d144ef845101e89ff924aed3fef5",
+  "checkpoint_load_by_optimizer": {
+    "adafactor": {
+      "complete": true,
+      "matched_tensors": 816,
+      "loaded_parameter_count": 605754251,
+      "missing": [],
+      "unexpected": [],
+      "shape_mismatches": []
+    }
+  },
+  "real_sample": {
+    "examples": [
+      {
+        "configuration": "moshaf_0.1",
+        "source_key": "moshaf_0.1:0.1:001.0000",
+        "duration_seconds": 6.06,
+        "sampling_rate": 16000
+      },
+      {
+        "configuration": "moshaf_0.1",
+        "source_key": "moshaf_0.1:0.1:001.0001",
+        "duration_seconds": 6.02,
+        "sampling_rate": 16000
+      },
+      {
+        "configuration": "moshaf_0.1",
+        "source_key": "moshaf_0.1:0.1:001.0002",
+        "duration_seconds": 6.28,
+        "sampling_rate": 16000
+      }
+    ],
+    "scanned_rows": 3,
+    "excluded_rows": []
+  },
+  "experiments": {
+    "adafactor": {
+      "mode": "full_finetune",
+      "optimizer": "adafactor",
+      "optimizer_foreach": null,
+      "gradient_checkpointing_configured": true,
+      "gradient_checkpointing_active": true,
+      "mixed_precision": "fp16 autocast",
+      "status": "completed",
+      "trainable_parameters": 605754251,
+      "micro_batch_size": 1,
+      "feature_frames_by_example": [
+        302,
+        300,
+        313
+      ],
+      "warmup_steps": 2,
+      "measured_steps": 10,
+      "total_optimizer_updates": 12,
+      "parameter_dtype_before_autocast": "torch.float32",
+      "scaler_enabled": true,
+      "loss": 0.00015856834943406284,
+      "finite_loss": true,
+      "warmup_steps_excluded_from_timing": 2,
+      "forward_seconds_mean": 0.2650017099997058,
+      "backward_seconds_mean": 0.5255488700002389,
+      "optimizer_step_seconds_mean": 0.6281804699998247,
+      "step_seconds_mean": 1.4187310499997694,
+      "examples_per_second": 0.7048552296082916,
+      "parameter_update_verified": true,
+      "gradient_present": true,
+      "finite_gradients_verified": true,
+      "scaler_scale": 65536.0,
+      "optimizer_state_initialized": true,
+      "optimizer_defaults": {
+        "lr": 1e-05,
+        "beta2_decay": -0.8,
+        "eps": [
+          null,
+          0.001
+        ],
+        "d": 1.0,
+        "weight_decay": 0.01,
+        "foreach": null,
+        "maximize": false
+      },
+      "adafactor_learning_rate_semantics": {
+        "implementation": "torch.optim.Adafactor",
+        "configured_lr": 1e-05,
+        "relative_step_option": "not exposed by PyTorch Adafactor; rho_t=min(lr,1/sqrt(step))",
+        "scale_parameter_option": "not exposed; PyTorch always scales by max(eps[1], RMS(parameter))",
+        "warmup_init_option": "not exposed",
+        "weight_decay": 0.01,
+        "weight_decay_semantics": "PyTorch Adafactor applies decoupled weight decay using lr as coefficient"
+      },
+      "effective_optimizer_learning_rate_by_group": [
+        1e-05
+      ],
+      "scheduler_during_benchmark": "constant LambdaLR (checkpoint-resume state verification only)",
+      "checkpointing_encoder_gradient_present": true,
+      "head_gradient_presence": {
+        "ghonna": true,
+        "hams_or_jahr": true,
+        "istitala": true,
+        "itbaq": true,
+        "phonemes": true,
+        "qalqla": true,
+        "safeer": true,
+        "shidda_or_rakhawa": true,
+        "tafashie": true,
+        "tafkheem_or_taqeeq": true,
+        "tikraar": true
+      },
+      "encoder_parameter_update_verified": true,
+      "head_parameter_update_verified": true,
+      "phase_memory_measurements": {
+        "forward": [
+          {
+            "baseline_allocated_bytes": 2423675392,
+            "baseline_reserved_bytes": 2428502016,
+            "peak_allocated_bytes": 3719891968,
+            "peak_reserved_bytes": 3741319168,
+            "allocated_transient_delta_bytes": 1296216576,
+            "reserved_transient_delta_bytes": 1312817152
+          },
+          {
+            "baseline_allocated_bytes": 2770956800,
+            "baseline_reserved_bytes": 5312086016,
+            "peak_allocated_bytes": 4052032512,
+            "peak_reserved_bytes": 5314183168,
+            "allocated_transient_delta_bytes": 1281075712,
+            "reserved_transient_delta_bytes": 2097152
+          },
+          {
+            "baseline_allocated_bytes": 2770954752,
+            "baseline_reserved_bytes": 5408555008,
+            "peak_allocated_bytes": 4052579840,
+            "peak_reserved_bytes": 5408555008,
+            "allocated_transient_delta_bytes": 1281625088,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2770969600,
+            "baseline_reserved_bytes": 5433720832,
+            "peak_allocated_bytes": 4052035072,
+            "peak_reserved_bytes": 5433720832,
+            "allocated_transient_delta_bytes": 1281065472,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2770956800,
+            "baseline_reserved_bytes": 5433720832,
+            "peak_allocated_bytes": 4050609152,
+            "peak_reserved_bytes": 5433720832,
+            "allocated_transient_delta_bytes": 1279652352,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2770954752,
+            "baseline_reserved_bytes": 5433720832,
+            "peak_allocated_bytes": 4052579840,
+            "peak_reserved_bytes": 5433720832,
+            "allocated_transient_delta_bytes": 1281625088,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2770969600,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 4052035072,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 1281065472,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2770956800,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 4050609152,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 1279652352,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2770954752,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 4052579840,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 1281625088,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2770969600,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 4052035072,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 1281065472,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2770956800,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 4050609152,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 1279652352,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2770954752,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 4052579840,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 1281625088,
+            "reserved_transient_delta_bytes": 0
+          }
+        ],
+        "backward": [
+          {
+            "baseline_allocated_bytes": 2531507712,
+            "baseline_reserved_bytes": 3741319168,
+            "peak_allocated_bytes": 4913382912,
+            "peak_reserved_bytes": 5093982208,
+            "allocated_transient_delta_bytes": 2381875200,
+            "reserved_transient_delta_bytes": 1352663040
+          },
+          {
+            "baseline_allocated_bytes": 2869293568,
+            "baseline_reserved_bytes": 5314183168,
+            "peak_allocated_bytes": 5242960384,
+            "peak_reserved_bytes": 5383389184,
+            "allocated_transient_delta_bytes": 2373666816,
+            "reserved_transient_delta_bytes": 69206016
+          },
+          {
+            "baseline_allocated_bytes": 2877848576,
+            "baseline_reserved_bytes": 5408555008,
+            "peak_allocated_bytes": 5245811200,
+            "peak_reserved_bytes": 5408555008,
+            "allocated_transient_delta_bytes": 2367962624,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2871634432,
+            "baseline_reserved_bytes": 5433720832,
+            "peak_allocated_bytes": 5240748544,
+            "peak_reserved_bytes": 5433720832,
+            "allocated_transient_delta_bytes": 2369114112,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2869952512,
+            "baseline_reserved_bytes": 5433720832,
+            "peak_allocated_bytes": 5242105344,
+            "peak_reserved_bytes": 5433720832,
+            "allocated_transient_delta_bytes": 2372152832,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2877848576,
+            "baseline_reserved_bytes": 5433720832,
+            "peak_allocated_bytes": 5245811200,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 2367962624,
+            "reserved_transient_delta_bytes": 2097152
+          },
+          {
+            "baseline_allocated_bytes": 2871634432,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5240748544,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 2369114112,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2869952512,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5242105344,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 2372152832,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2877848576,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5245811200,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 2367962624,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2871634432,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5240748544,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 2369114112,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2869952512,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5242105344,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 2372152832,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 2877848576,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5245811200,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 2367962624,
+            "reserved_transient_delta_bytes": 0
+          }
+        ],
+        "optimizer": [
+          {
+            "baseline_allocated_bytes": 4868689920,
+            "baseline_reserved_bytes": 5093982208,
+            "peak_allocated_bytes": 5230094336,
+            "peak_reserved_bytes": 5312086016,
+            "allocated_transient_delta_bytes": 361404416,
+            "reserved_transient_delta_bytes": 218103808
+          },
+          {
+            "baseline_allocated_bytes": 5197182976,
+            "baseline_reserved_bytes": 5383389184,
+            "peak_allocated_bytes": 5230778368,
+            "peak_reserved_bytes": 5408555008,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 25165824
+          },
+          {
+            "baseline_allocated_bytes": 5194348032,
+            "baseline_reserved_bytes": 5408555008,
+            "peak_allocated_bytes": 5227943424,
+            "peak_reserved_bytes": 5433720832,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 25165824
+          },
+          {
+            "baseline_allocated_bytes": 5195435520,
+            "baseline_reserved_bytes": 5433720832,
+            "peak_allocated_bytes": 5229030912,
+            "peak_reserved_bytes": 5433720832,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 5196859904,
+            "baseline_reserved_bytes": 5433720832,
+            "peak_allocated_bytes": 5230455296,
+            "peak_reserved_bytes": 5433720832,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 5194348032,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5227943424,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 5195435520,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5229030912,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 5196859904,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5230455296,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 5194348032,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5227943424,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 5195435520,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5229030912,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 5196859904,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5230455296,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 0
+          },
+          {
+            "baseline_allocated_bytes": 5194348032,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5227943424,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 33595392,
+            "reserved_transient_delta_bytes": 0
+          }
+        ],
+        "checkpoint": [
+          {
+            "baseline_allocated_bytes": 5195435008,
+            "baseline_reserved_bytes": 5435817984,
+            "peak_allocated_bytes": 5195435008,
+            "peak_reserved_bytes": 5435817984,
+            "allocated_transient_delta_bytes": 0,
+            "reserved_transient_delta_bytes": 0
+          }
+        ]
+      },
+      "phase_allocated_transient_max_bytes_all_updates": {
+        "forward": 1296216576,
+        "backward": 2381875200,
+        "optimizer": 361404416,
+        "checkpoint": 0
+      },
+      "phase_allocated_transient_max_bytes_measured_updates": {
+        "forward": 1281625088,
+        "backward": 2372152832,
+        "optimizer": 33595392,
+        "checkpoint": 0
+      },
+      "memory_measurement_definition": "Forward, backward, optimizer, and checkpoint phases reset CUDA peak stats after recording their live allocated/reserved baseline; phase peak is absolute total at that phase, transient delta is peak minus that phase baseline. Phase deltas overlap live tensors and must not be summed. Run peaks are maxima of absolute phase peaks.",
+      "parameter_bytes_by_dtype": {
+        "cuda:torch.float32": 2423017004
+      },
+      "gradient_bytes_by_dtype": {
+        "cuda:torch.float32": 2423017004
+      },
+      "trainable_parameter_count": 605754251,
+      "parameters_with_grad_count": 605754251,
+      "parameter_tensor_count": 816,
+      "gradient_tensor_count": 816,
+      "optimizer_state_bytes_by_dtype": {
+        "cpu:torch.float32": 3264,
+        "cuda:torch.float32": 327785784
+      },
+      "optimizer_state_tensor_count": 1940,
+      "peak_allocated_bytes": 5245811200,
+      "peak_reserved_bytes": 5435817984,
+      "measured_updates_peak_allocated_bytes": 5245811200,
+      "measured_updates_peak_reserved_bytes": 5435817984,
+      "current_allocated_bytes": 5194347520,
+      "gpu_total_bytes": 6441926656,
+      "nvidia_smi_peak_used_mib": 5331,
+      "nvidia_smi_samples": 234,
+      "nvidia_smi_peak_by_phase_mib": {
+        "warmup_forward": 5213,
+        "warmup_backward": 5219,
+        "warmup_optimizer": 5305,
+        "measured_forward": 5331,
+        "measured_backward": 5331,
+        "measured_optimizer": 5331,
+        "checkpoint_io": 5331
+      },
+      "nvidia_smi_sample_count_by_phase": {
+        "warmup_forward": 10,
+        "warmup_backward": 20,
+        "warmup_optimizer": 8,
+        "measured_forward": 15,
+        "measured_backward": 34,
+        "measured_optimizer": 37,
+        "checkpoint_io": 110
+      },
+      "system_memory_samples": 384,
+      "process_rss_peak_bytes": 3154108416,
+      "system_used_peak_bytes": 25951981568,
+      "system_available_min_bytes": 8077180928,
+      "checkpoint_resume_verification": {
+        "source_checkpoint_complete": true,
+        "model_state_restored_exactly": true,
+        "optimizer_state_restored_exactly": true,
+        "scheduler_state_restored_exactly": true,
+        "global_step_restored": true,
+        "global_step": 7,
+        "restored_optimizer_state_tensor_count": 1940,
+        "learning_rate_after_restore": [
+          1e-05
+        ],
+        "subsequent_update_succeeded": true,
+        "subsequent_loss_finite": true,
+        "subsequent_global_step": 8
+      },
+      "nvidia_smi_poll_wait_interval_seconds": 0.1
+    }
+  },
+  "note": "10 microbatches from 3 real examples for each full-finetune optimizer; no epoch or corpus training was run.",
+  "previous_results_before_audit": {
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "torch_version": "2.11.0+cu128",
+    "cuda_version": "12.8",
+    "training_config": {
+      "mode": "full_finetune",
+      "optimizer": "adamw",
+      "optimizer_foreach": null,
+      "learning_rate": 1e-05,
+      "weight_decay": 0.01,
+      "scheduler": "linear",
+      "warmup_ratio": 0.05,
+      "gradient_accumulation_steps": 16,
+      "max_grad_norm": 1.0,
+      "mixed_precision": "fp16",
+      "gradient_checkpointing": true,
+      "micro_batch_size": 1,
+      "epochs": 5,
+      "evaluation_steps": 500,
+      "checkpoint_steps": 500,
+      "seed": 42,
+      "num_workers": 0
+    },
+    "verified_checkpoint": "obadx/muaalem-model-v3_2",
+    "checkpoint_revision": "01a1ef9fbe40d144ef845101e89ff924aed3fef5",
+    "checkpoint_load_by_optimizer": {
+      "adamw": {
+        "complete": true,
+        "matched_tensors": 816,
+        "loaded_parameter_count": 605754251,
+        "missing": [],
+        "unexpected": [],
+        "shape_mismatches": []
+      },
+      "adamw_no_foreach": {
+        "complete": true,
+        "matched_tensors": 816,
+        "loaded_parameter_count": 605754251,
+        "missing": [],
+        "unexpected": [],
+        "shape_mismatches": []
+      },
+      "adamw8bit": {
+        "complete": true,
+        "matched_tensors": 816,
+        "loaded_parameter_count": 605754251,
+        "missing": [],
+        "unexpected": [],
+        "shape_mismatches": []
+      },
+      "adafactor": {
+        "complete": true,
+        "matched_tensors": 816,
+        "loaded_parameter_count": 605754251,
+        "missing": [],
+        "unexpected": [],
+        "shape_mismatches": []
+      }
+    },
+    "real_sample": {
+      "examples": [
+        {
+          "configuration": "moshaf_0.1",
+          "source_key": "moshaf_0.1:0.1:001.0000",
+          "duration_seconds": 6.06,
+          "sampling_rate": 16000
+        },
+        {
+          "configuration": "moshaf_0.1",
+          "source_key": "moshaf_0.1:0.1:001.0001",
+          "duration_seconds": 6.02,
+          "sampling_rate": 16000
+        },
+        {
+          "configuration": "moshaf_0.1",
+          "source_key": "moshaf_0.1:0.1:001.0002",
+          "duration_seconds": 6.28,
+          "sampling_rate": 16000
+        }
+      ],
+      "scanned_rows": 3,
+      "excluded_rows": []
+    },
+    "experiments": {
+      "adamw": {
+        "mode": "full_finetune",
+        "optimizer": "adamw",
+        "optimizer_foreach": null,
+        "gradient_checkpointing_configured": true,
+        "gradient_checkpointing_active": true,
+        "mixed_precision": "fp16 autocast",
+        "status": "completed",
+        "trainable_parameters": 605754251,
+        "micro_batch_size": 1,
+        "feature_frames_by_example": [
+          302,
+          300,
+          313
+        ],
+        "steps": 3,
+        "parameter_dtype_before_autocast": "torch.float32",
+        "scaler_enabled": true,
+        "loss": 0.00014451034076046199,
+        "finite_loss": true,
+        "forward_seconds_mean": 1.0306821000000734,
+        "backward_seconds_mean": 2.079532899999928,
+        "optimizer_step_seconds_mean": 4.264404300000024,
+        "step_seconds_mean": 7.374619300000025,
+        "examples_per_second": 0.13560022006830869,
+        "parameter_update_verified": true,
+        "gradient_present": true,
+        "scaler_scale": 65536.0,
+        "optimizer_state_initialized": true,
+        "checkpointing_encoder_gradient_present": true,
+        "head_gradient_presence": {
+          "ghonna": true,
+          "hams_or_jahr": true,
+          "istitala": true,
+          "itbaq": true,
+          "phonemes": true,
+          "qalqla": true,
+          "safeer": true,
+          "shidda_or_rakhawa": true,
+          "tafashie": true,
+          "tafkheem_or_taqeeq": true,
+          "tikraar": true
+        },
+        "encoder_parameter_update_verified": true,
+        "head_parameter_update_verified": true,
+        "activation_transient_peak_bytes_by_phase": {
+          "forward": 1296216576,
+          "backward": 2381875200,
+          "optimizer": 7269087744
+        },
+        "parameter_bytes_by_dtype": {
+          "cuda:torch.float32": 2423017004
+        },
+        "gradient_bytes_by_dtype": {
+          "cuda:torch.float32": 2423017004
+        },
+        "trainable_parameter_count": 605754251,
+        "parameters_with_grad_count": 605754251,
+        "parameter_tensor_count": 816,
+        "gradient_tensor_count": 816,
+        "optimizer_state_bytes_by_dtype": {
+          "cpu:torch.float32": 3264,
+          "cuda:torch.float32": 4846034008
+        },
+        "optimizer_state_tensor_count": 2448,
+        "peak_allocated_bytes": 12137077248,
+        "peak_reserved_bytes": 12314476544,
+        "current_allocated_bytes": 9714047488,
+        "gpu_total_bytes": 6441926656,
+        "nvidia_smi_peak_used_mib": 5979,
+        "nvidia_smi_samples": 85,
+        "system_memory_samples": 206,
+        "process_rss_peak_bytes": 9290862592,
+        "system_used_peak_bytes": 31142952960,
+        "system_available_min_bytes": 2886209536
+      },
+      "adamw_no_foreach": {
+        "mode": "full_finetune",
+        "optimizer": "adamw",
+        "optimizer_foreach": false,
+        "gradient_checkpointing_configured": true,
+        "gradient_checkpointing_active": true,
+        "mixed_precision": "fp16 autocast",
+        "status": "completed",
+        "trainable_parameters": 605754251,
+        "micro_batch_size": 1,
+        "feature_frames_by_example": [
+          302,
+          300,
+          313
+        ],
+        "steps": 3,
+        "parameter_dtype_before_autocast": "torch.float32",
+        "scaler_enabled": true,
+        "loss": 0.00019028842507395893,
+        "finite_loss": true,
+        "forward_seconds_mean": 0.13005696666671915,
+        "backward_seconds_mean": 0.27254043333353667,
+        "optimizer_step_seconds_mean": 3.0356030333338517,
+        "step_seconds_mean": 3.438200433334108,
+        "examples_per_second": 0.2908498266432581,
+        "parameter_update_verified": true,
+        "gradient_present": true,
+        "scaler_scale": 65536.0,
+        "optimizer_state_initialized": true,
+        "checkpointing_encoder_gradient_present": true,
+        "head_gradient_presence": {
+          "ghonna": true,
+          "hams_or_jahr": true,
+          "istitala": true,
+          "itbaq": true,
+          "phonemes": true,
+          "qalqla": true,
+          "safeer": true,
+          "shidda_or_rakhawa": true,
+          "tafashie": true,
+          "tafkheem_or_taqeeq": true,
+          "tikraar": true
+        },
+        "encoder_parameter_update_verified": true,
+        "head_parameter_update_verified": true,
+        "activation_transient_peak_bytes_by_phase": {
+          "forward": 1288682496,
+          "backward": 2371355136,
+          "optimizer": 4896394240
+        },
+        "parameter_bytes_by_dtype": {
+          "cuda:torch.float32": 2423017004
+        },
+        "gradient_bytes_by_dtype": {
+          "cuda:torch.float32": 2423017004
+        },
+        "trainable_parameter_count": 605754251,
+        "parameters_with_grad_count": 605754251,
+        "parameter_tensor_count": 816,
+        "gradient_tensor_count": 816,
+        "optimizer_state_bytes_by_dtype": {
+          "cpu:torch.float32": 3264,
+          "cuda:torch.float32": 4846034008
+        },
+        "optimizer_state_tensor_count": 2448,
+        "peak_allocated_bytes": 9764702720,
+        "peak_reserved_bytes": 9963569152,
+        "current_allocated_bytes": 9714366464,
+        "gpu_total_bytes": 6441926656,
+        "nvidia_smi_peak_used_mib": 5979,
+        "nvidia_smi_samples": 40,
+        "system_memory_samples": 95,
+        "process_rss_peak_bytes": 7152218112,
+        "system_used_peak_bytes": 28456124416,
+        "system_available_min_bytes": 5573038080
+      },
+      "adamw8bit": {
+        "mode": "full_finetune",
+        "optimizer": "adamw8bit",
+        "optimizer_foreach": null,
+        "gradient_checkpointing_configured": true,
+        "gradient_checkpointing_active": true,
+        "mixed_precision": "fp16 autocast",
+        "status": "completed",
+        "trainable_parameters": 605754251,
+        "micro_batch_size": 1,
+        "feature_frames_by_example": [
+          302,
+          300,
+          313
+        ],
+        "steps": 3,
+        "parameter_dtype_before_autocast": "torch.float32",
+        "scaler_enabled": true,
+        "loss": 0.00015871465438976884,
+        "finite_loss": true,
+        "forward_seconds_mean": 0.1544377333339071,
+        "backward_seconds_mean": 0.33388553333376575,
+        "optimizer_step_seconds_mean": 0.24229669999901185,
+        "step_seconds_mean": 0.7306199666666847,
+        "examples_per_second": 1.3687006181371018,
+        "parameter_update_verified": true,
+        "gradient_present": true,
+        "scaler_scale": 65536.0,
+        "optimizer_state_initialized": true,
+        "checkpointing_encoder_gradient_present": true,
+        "head_gradient_presence": {
+          "ghonna": true,
+          "hams_or_jahr": true,
+          "istitala": true,
+          "itbaq": true,
+          "phonemes": true,
+          "qalqla": true,
+          "safeer": true,
+          "shidda_or_rakhawa": true,
+          "tafashie": true,
+          "tafkheem_or_taqeeq": true,
+          "tikraar": true
+        },
+        "encoder_parameter_update_verified": true,
+        "head_parameter_update_verified": true,
+        "activation_transient_peak_bytes_by_phase": {
+          "forward": 1286569984,
+          "backward": 2371204096,
+          "optimizer": 1237014528
+        },
+        "parameter_bytes_by_dtype": {
+          "cuda:torch.float32": 2423017004
+        },
+        "gradient_bytes_by_dtype": {
+          "cuda:torch.float32": 2423017004
+        },
+        "trainable_parameter_count": 605754251,
+        "parameters_with_grad_count": 605754251,
+        "parameter_tensor_count": 816,
+        "gradient_tensor_count": 816,
+        "optimizer_state_bytes_by_dtype": {
+          "cuda:torch.float32": 23499384,
+          "cuda:torch.uint8": 1210541056
+        },
+        "optimizer_state_tensor_count": 3028,
+        "peak_allocated_bytes": 6104603648,
+        "peak_reserved_bytes": 6318718976,
+        "current_allocated_bytes": 6104603136,
+        "gpu_total_bytes": 6441926656,
+        "nvidia_smi_peak_used_mib": 5987,
+        "nvidia_smi_samples": 9,
+        "system_memory_samples": 21,
+        "process_rss_peak_bytes": 3561119744,
+        "system_used_peak_bytes": 24690073600,
+        "system_available_min_bytes": 9339088896
+      },
+      "adafactor": {
+        "mode": "full_finetune",
+        "optimizer": "adafactor",
+        "optimizer_foreach": null,
+        "gradient_checkpointing_configured": true,
+        "gradient_checkpointing_active": true,
+        "mixed_precision": "fp16 autocast",
+        "status": "completed",
+        "trainable_parameters": 605754251,
+        "micro_batch_size": 1,
+        "feature_frames_by_example": [
+          302,
+          300,
+          313
+        ],
+        "steps": 3,
+        "parameter_dtype_before_autocast": "torch.float32",
+        "scaler_enabled": true,
+        "loss": 0.0003247724089305848,
+        "finite_loss": true,
+        "forward_seconds_mean": 0.10295006666698707,
+        "backward_seconds_mean": 0.19508076666655447,
+        "optimizer_step_seconds_mean": 0.510520166666538,
+        "step_seconds_mean": 0.8085510000000795,
+        "examples_per_second": 1.2367803638853971,
+        "parameter_update_verified": true,
+        "gradient_present": true,
+        "scaler_scale": 65536.0,
+        "optimizer_state_initialized": true,
+        "checkpointing_encoder_gradient_present": true,
+        "head_gradient_presence": {
+          "ghonna": true,
+          "hams_or_jahr": true,
+          "istitala": true,
+          "itbaq": true,
+          "phonemes": true,
+          "qalqla": true,
+          "safeer": true,
+          "shidda_or_rakhawa": true,
+          "tafashie": true,
+          "tafkheem_or_taqeeq": true,
+          "tikraar": true
+        },
+        "encoder_parameter_update_verified": true,
+        "head_parameter_update_verified": true,
+        "activation_transient_peak_bytes_by_phase": {
+          "forward": 1286024704,
+          "backward": 2371204096,
+          "optimizer": 361404416
+        },
+        "parameter_bytes_by_dtype": {
+          "cuda:torch.float32": 2423017004
+        },
+        "gradient_bytes_by_dtype": {
+          "cuda:torch.float32": 2423017004
+        },
+        "trainable_parameter_count": 605754251,
+        "parameters_with_grad_count": 605754251,
+        "parameter_tensor_count": 816,
+        "gradient_tensor_count": 816,
+        "optimizer_state_bytes_by_dtype": {
+          "cpu:torch.float32": 3264,
+          "cuda:torch.float32": 327785784
+        },
+        "optimizer_state_tensor_count": 1940,
+        "peak_allocated_bytes": 5228760576,
+        "peak_reserved_bytes": 5440012288,
+        "current_allocated_bytes": 5195164672,
+        "gpu_total_bytes": 6441926656,
+        "nvidia_smi_peak_used_mib": 5335,
+        "nvidia_smi_samples": 10,
+        "system_memory_samples": 23,
+        "process_rss_peak_bytes": 3799732224,
+        "system_used_peak_bytes": 24860241920,
+        "system_available_min_bytes": 9168920576
+      }
+    },
+    "note": "3 microbatches from 3 real examples for each full-finetune optimizer; no epoch or corpus training was run."
+  },
+  "measurement_method": {
+    "phase_baseline": "Live allocated and reserved bytes captured separately immediately before each phase.",
+    "phase_peak": "Absolute CUDA phase maximum after resetting peak stats at that phase baseline.",
+    "phase_transient": "Absolute phase peak minus that same phase's live baseline; phase deltas overlap and are not additive.",
+    "run_peak": "Maximum absolute phase peak across all warmup and measured phases.",
+    "measured_run_peak": "Maximum absolute phase peak excluding warmup updates.",
+    "memory_sampling": "nvidia-smi and psutil poll loops use a 0.1-second wait interval; actual cadence also includes query latency."
+  }
+}
